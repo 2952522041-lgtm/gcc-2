@@ -398,6 +398,14 @@ body.dark .hero{background:linear-gradient(150deg,#0c2b1e 0%,#0d3a2a 45%,#123a63
 body.dark .codeblock figcaption{background:#0c1511;border-bottom-color:#1e2d26;}
 body.dark .codeblock pre{background:#0a100d;}
 body.dark mark.key{color:#34d399;}
+/* === 验收自检清单（第 20 章） === */
+.accept-bar{height:8px;border-radius:99px;background:rgba(11,158,107,.12);overflow:hidden;margin:.2rem 0 .3rem;}
+#acceptBar{height:100%;width:0;background:var(--grad);transition:width .3s;}
+.accept-txt{font-size:.85rem;color:var(--muted);margin:0 0 .8rem;font-family:var(--font-mono);}
+.accept-item{display:flex;gap:.55rem;align-items:flex-start;padding:.45rem .6rem;border-radius:8px;font-size:.92rem;cursor:pointer;}
+.accept-item:hover{background:rgba(11,158,107,.05);}
+.accept-item input{margin-top:.3rem;accent-color:var(--accent);width:15px;height:15px;flex:none;}
+body.dark .accept-item:hover{background:rgba(52,211,153,.08);}
 </style>
 </head>
 <body>
@@ -436,9 +444,11 @@ body.dark mark.key{color:#34d399;}
     <a class="nav-link" href="#ch17"><span class="nl-num">17</span>交叉编译与嵌入式</a>
     <a class="nav-link" href="#ch18"><span class="nl-num">18</span>错误图鉴 &amp; FAQ</a>
     <a class="nav-link" href="#ch19"><span class="nl-num">19</span>术语表 Glossary</a>
+    <div class="nav-label">结课验收</div>
+    <a class="nav-link" href="#ch20"><span class="nl-num">20</span>结课验收 Capstone</a>
   </nav>
   <div class="sidebar-foot">
-    本课程适合已掌握 C 语言基础、希望深入理解编译过程的读者。<br>建议按章节顺序学习，第 13 章需 Linux 或 WSL 环境。
+    本课程适合已掌握 C 语言基础、希望深入理解编译过程的读者。<br>建议按章节顺序学习，第 13、20 章需 Linux 或 WSL 环境。
   </div>
 </aside>
 <div class="overlay" id="overlay"></div>
@@ -466,7 +476,7 @@ body.dark mark.key{color:#34d399;}
         <span class="chip">objdump · readelf · gdb</span>
       </div>
       <div class="stats">
-        <div class="stat"><div class="v">19<span> 章</span></div><div class="l">体系化课程</div></div>
+        <div class="stat"><div class="v">20<span> 章</span></div><div class="l">体系化课程</div></div>
         <div class="stat"><div class="v">40<span>+</span></div><div class="l">可运行示例</div></div>
         <div class="stat"><div class="v">12<span> 幅</span></div><div class="l">图表与图示</div></div>
         <div class="stat"><div class="v">20<span> 题</span></div><div class="l">在线测验</div></div>
@@ -480,9 +490,9 @@ body.dark mark.key{color:#34d399;}
     <p class="sec-lead">这门课回答三个问题：GCC 把一个 <code>.c</code> 文件变成可执行文件，中间经历了什么？每一阶段的数据结构长什么样？我们如何用工具亲眼观察这些过程？</p>
     <div class="card-grid">
       <div class="card"><h4>📚 前置知识</h4><ul><li>C 语言基础语法与指针</li><li>基本的 Linux 命令行</li><li>对"程序如何运行"的好奇心</li></ul></div>
-      <div class="card"><h4>🧭 学习路径</h4><ul><li>第 1–2 章：建立全局认知</li><li>第 3–10 章：逐层深入八阶段</li><li>第 11–12 章：窥探 GCC 内部</li><li>第 13–14 章：动手实验 + 自测</li></ul></div>
+      <div class="card"><h4>🧭 学习路径</h4><ul><li>第 1–2 章：建立全局认知</li><li>第 3–10 章：逐层深入八阶段</li><li>第 11–12 章：窥探 GCC 内部</li><li>第 13–14 章：动手实验 + 自测</li><li>第 15–19 章：进阶专题</li><li>第 20 章：结课项目验收</li></ul></div>
       <div class="card"><h4>💻 实验环境</h4><ul><li>Linux 发行版 / WSL / macOS</li><li>GCC ≥ 11（推荐 13 或 14）</li><li>binutils（objdump/readelf）</li><li>gdb、strace 等调试工具</li></ul></div>
-      <div class="card"><h4>🎯 学成目标</h4><ul><li>能说出四阶段各自输入输出</li><li>能读懂 GIMPLE 与 x86-64 汇编</li><li>理解 -O 等级如何影响性能</li><li>会用工具"解剖"任意二进制</li></ul></div>
+      <div class="card"><h4>🎯 学成目标</h4><ul><li>能说出四阶段各自输入输出</li><li>能读懂 GIMPLE 与 x86-64 汇编</li><li>理解 -O 等级如何影响性能</li><li>会用工具"解剖"任意二进制</li><li>能独立实现一个小型编译器并通过第 20 章验收</li></ul></div>
     </div>
     <div class="callout tip"><span class="ico">💡</span><p><strong>本课程的"主角"</strong>：一条命令贯穿始终 —— <code>gcc hello.c -o hello</code>。我们每讲完一个阶段，就回到这条命令，用 <code>-E</code>、<code>-S</code>、<code>-c</code> 等选项把它拆开看。所有原理都附真实、可复现的命令输出。</p></div>
 
@@ -3568,6 +3578,438 @@ file build/app
   <div class="callout tip"><span class="ico">📖</span><p><strong>用法建议</strong>：把本表当作"阅读地图"——遇到陌生术语，先查它在哪个主题分组，再回到对应章节看完整讲解。术语之间的联系比术语本身更重要。</p></div>
 </section>
 
+<!-- ===================== 第二十章 ===================== -->
+<section class="chapter" id="ch20">
+  <h2 class="sec"><span class="sec-num">20</span>结课验收：MiniC 编译器毕业项目<span></span></h2>
+  <p class="sec-lead">19 章学完了，是时候交作业了。这一章是一份完整的毕业项目任务书：从零实现一个把类 C 子集编译成 x86-64 汇编的 MiniC 编译器，配套 0–6 共七个步骤、5+1 个验收测试用例、评分标准与验收报告模板。做完它，编译原理才真正属于你。</p>
+
+  <h3>20.1 项目任务书：MiniC 编译器</h3>
+  <p><strong>任务</strong>：用任意语言（推荐 Python），从零实现一个把 MiniC 源码编译成 x86-64 汇编的编译器，再用 GCC 工具链（<code>as</code> 汇编 + <code>ld</code> 链接）把它变成可执行文件，最后用 <code>gcc -S</code>、<code>objdump</code>、<code>readelf</code> 对比验证自己的成果。整个项目约 250 行代码、5 个基础测试用例、一页验收报告，预计 2–4 天完成。</p>
+  <p>这个项目把第 4、5、6、9 章的主线（词法 → 语法 → AST → 代码生成）完整打通，同时强制你动用第 2、10 章的工具链知识与第 12 章的逆向验证手段——19 章所学，一半以上都要在这里派上用场。</p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart LR
+  A["MiniC 源码<br/><span style='font-size:11px'>while 循环、变量、print</span>"]
+  B["词法分析<br/><span style='font-size:11px'>Token 流</span>"]
+  C["语法分析<br/><span style='font-size:11px'>AST</span>"]
+  D["代码生成<br/><span style='font-size:11px'>x86-64 汇编 .s</span>"]
+  E["as 汇编 + ld 链接<br/><span style='font-size:11px'>可执行文件</span>"]
+  F["测试套件验证<br/><span style='font-size:11px'>与 GCC 对比</span>"]
+  A --> B --> C --> D --> E --> F
+  style A fill:#2f6bff18,stroke:#2f6bff
+  style B fill:#ffffff,stroke:#dbe6df
+  style C fill:#0b9e6b22,stroke:#0b9e6b
+  style D fill:#2f6bff18,stroke:#2f6bff
+  style E fill:#ffffff,stroke:#dbe6df
+  style F fill:#0b9e6b22,stroke:#0b9e6b
+    </pre>
+    <figcaption>图 20-1　验收项目数据流：你的编译器负责前四步，GCC 工具链接棒后两步——第 2、10 章的知识在这里变成生产环节</figcaption>
+  </div>
+
+  <h4>MiniC 语言规范（照此实现，不要私自加戏）</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>类别</th><th>语法</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>输出语句</td><td><code>print 表达式 ;</code></td><td>打印一个整数并换行</td></tr>
+        <tr><td>赋值语句</td><td><code>名字 = 表达式 ;</code></td><td>首次出现即声明（int 类型，分配栈槽）</td></tr>
+        <tr><td>分支语句</td><td><code>if ( 表达式 ) 语句 [ else 语句 ]</code></td><td>0 为假、非 0 为真</td></tr>
+        <tr><td>循环语句</td><td><code>while ( 表达式 ) 语句</code></td><td>每轮结束重新测试条件</td></tr>
+        <tr><td>块语句</td><td><code>{ 语句 语句 … }</code></td><td>作用域可简化：全程序共用一个符号表</td></tr>
+        <tr><td>表达式</td><td><code>数字 | 名字 | ( 表达式 ) | 表达式 运算符 表达式</code></td><td><code>+ - * /</code>；进阶加比较 <code>== != &lt; &lt;= &gt; &gt;=</code></td></tr>
+        <tr><td>注释</td><td><code>#</code> 到行尾</td><td>测试文件首行就是 <code># expect:</code> 注释，词法器必须支持</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>目标程序的完整示例（也是本项目最难的一道测试题）：</p>
+  <div class="codeblock">
+    <figcaption>tests/t5_sum100.txt —— 1+2+…+100，期望输出 5050</figcaption>
+    <pre><code><span class="c"># expect: 5050</span>
+i = 100;
+sum = 0;
+<span class="k">while</span> (i) {
+    sum = sum + i;
+    i = i - 1;
+}
+print sum;</code></pre>
+  </div>
+
+  <h4>评分标准（满分 100，60 分及格）</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>项目</th><th>分值</th><th>验收标准</th></tr></thead>
+      <tbody>
+        <tr><td>M1 词法分析</td><td>12</td><td><code>--tokens</code> 输出正确的 token 流</td></tr>
+        <tr><td>M2 语法分析</td><td>12</td><td><code>--ast</code> 打印出正确的树形结构</td></tr>
+        <tr><td>M3 代码生成</td><td>12</td><td><code>print 1 + 2 * 3;</code> 输出 7</td></tr>
+        <tr><td>M4 变量与赋值</td><td>12</td><td><code>x = 3; y = x * 4; print y;</code> 输出 12</td></tr>
+        <tr><td>M5 控制流</td><td>12</td><td>t3 / t4 / t5 全部通过（含 1..100 求和）</td></tr>
+        <tr><td>测试套件</td><td>20</td><td>5 个基础用例 <code>./run_tests.sh</code> 全部 PASS</td></tr>
+        <tr><td>验收报告</td><td>20</td><td>一页以上，含 GCC 对比分析（20.8 模板）</td></tr>
+        <tr><td>加分项</td><td>+10 封顶</td><td>比较运算 +5 ｜ 函数调用 +10 ｜ 报错带行列号 +5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn"><span class="ico">⚖️</span><p><strong>关于参考答案</strong>：第 16 章附赠的 <code>tinycc_full.py</code> 就是本项目的一份"标准答案"。规则：先独立实现；卡壳超过 30 分钟可以翻阅，但必须在验收报告里写明<strong>卡在哪一步、参考答案的思路是什么</strong>。只抄不理解 = 项目作废，因为验收报告里的 GCC 对比分析谁也替你写不了。</p></div>
+
+  <div class="step-flow">
+    <span class="st">M0 环境</span><span class="arrow">→</span>
+    <span class="st">M1 词法</span><span class="arrow">→</span>
+    <span class="st">M2 语法</span><span class="arrow">→</span>
+    <span class="st">M3 代码生成</span><span class="arrow">→</span>
+    <span class="st">M4 变量</span><span class="arrow">→</span>
+    <span class="st">M5 控制流</span><span class="arrow">→</span>
+    <span class="st">M6 进阶</span><span class="arrow">→</span>
+    <span class="st">验收</span>
+  </div>
+  <p style="font-size:.9rem;color:var(--muted)">每个里程碑对应一个或多个步骤，<strong>过一关再进下一关</strong>：每个里程碑都有独立的验收命令，通过前不要继续——这正是课程导览里说的"增量式项目制"。</p>
+
+  <h3>20.2 步骤 0：环境与项目骨架</h3>
+  <p>准备一个空目录，验证三件工具都在（第 2 章的流水线在这里全员到场）：</p>
+  <div class="codeblock">
+    <figcaption>环境检查（Linux / WSL，需要 x86-64 平台）</figcaption>
+    <pre><code>mkdir ~/minic &amp;&amp; cd ~/minic
+gcc --version | head -1     <span class="c"># GCC ≥ 9，自带 as / ld</span>
+as --version | head -1
+python3 --version           <span class="c"># 语言不限，Python 最省事</span></code></pre>
+  </div>
+  <p>项目骨架固定如下，测试与编译器分离：</p>
+  <div class="codeblock">
+    <figcaption>项目目录结构</figcaption>
+    <pre><code>minic/
+├── minic.py        <span class="c"># 你的编译器（≈250 行）：词法 + 语法 + 代码生成</span>
+├── tests/          <span class="c"># 5 个测试程序，每个文件首行写期望输出</span>
+│   ├── t1_arith.txt
+│   ├── t2_assign.txt
+│   ├── t3_if.txt
+│   ├── t4_while.txt
+│   └── t5_sum100.txt
+└── run_tests.sh    <span class="c"># 一键验收：编译每个程序并比对期望输出</span></code></pre>
+  </div>
+  <p>先把一键验收脚本写出来——<strong>测试先行</strong>，后面的每一步都有明确的"过"与"不过"：</p>
+  <div class="codeblock">
+    <figcaption>run_tests.sh —— 你的验收裁判（t 开头的每个 txt 都测）</figcaption>
+    <pre><code><span class="c">#!/bin/bash</span>
+<span class="c"># 用法: ./run_tests.sh   （测试文件首行须为 "# expect: 期望输出"）</span>
+<span class="k">for</span> f in tests/t*.txt; <span class="k">do</span>
+  expected=$(grep '^# expect:' "$f" | cut -d' ' -f3-)
+  python3 minic.py "$f" &gt; /tmp/minic_out.s
+  gcc -no-pie /tmp/minic_out.s -o /tmp/minic_out
+  got=$(/tmp/minic_out)
+  <span class="k">if</span> [ "$got" = "$expected" ]; <span class="k">then</span>
+    echo <span class="s">"PASS $f -&gt; $got"</span>
+  <span class="k">else</span>
+    echo <span class="s">"FAIL $f: got=$got want=$expected"</span>
+  <span class="k">fi</span>
+<span class="k">done</span>
+chmod +x run_tests.sh</code></pre>
+  </div>
+  <div class="callout tip"><span class="ico">🔗</span><p><strong>为什么是 <code>-no-pie</code>？</strong>第 10 章：默认 PIE 模式下，汇编里直接 <code>call printf</code> 会因位置无关代码（PIC）要求触发 <code>R_X86_64_PC32</code> 重定位报错，需要改走 PLT。<code>-no-pie</code> 先关掉它，等你做完基础版，再回来解决 PIE——那本身就是一道很棒的附加题。</p></div>
+
+  <h3>20.3 步骤 1–2：词法 + 语法分析</h3>
+  <h4>步骤 1（M1）：词法分析器 —— 对应第 4 章</h4>
+  <p>输入字符串，输出 token 流。需要识别：<code>NUM</code>（数字）、<code>ID</code>（字母/下划线开头）、关键字（<code>if / else / while / print</code>）、双字符运算符（<code>== != &lt;= &gt;=</code>）、单字符（<code>+ - * / ( ) { } ; &lt; &gt; =</code>），跳过空白与 <code>#</code> 注释。建议加一个 <code>--tokens</code> 调试开关，验收就看它：</p>
+  <div class="codeblock">
+    <figcaption>$ python3 minic.py --tokens tests/t1_arith.txt</figcaption>
+    <pre><code>print     →  ('print', 'print')
+1         →  ('NUM', 1)
++         →  ('+', '+')
+2         →  ('NUM', 2)
+*         →  ('*', '*')
+3         →  ('NUM', 3)
+;         →  (';', ';')
+EOF</code></pre>
+  </div>
+  <div class="callout note"><span class="ico">🕳️</span><p><strong>三个坑位</strong>：① 双字符运算符必须在单字符之前判断——最长匹配原则，第 4 章；② 关键字与标识符的区分：先按字母拼完整单词，再查关键字表，不要边读边猜；③ <code>#</code> 注释：从 <code>#</code> 一直跳到行尾——第 16 章的教学版没实现它，验收版<strong>必须支持</strong>，因为测试文件第一行就是注释。</p></div>
+
+  <h4>步骤 2（M2）：递归下降解析器 —— 对应第 5 章</h4>
+  <p>一个产生式一个函数。表达式层靠调用层级表达优先级（<code>cmp → arith → term → factor</code>，第 16 章已演示）；本项目的增量在<strong>语句层</strong>，按 <code>peek</code> 分派：</p>
+  <div class="codeblock">
+    <figcaption>minic.py —— 语句层解析骨架</figcaption>
+    <pre><code><span class="k">def</span> <span class="f">statement</span>(self):
+    t = self.peek()[<span class="n">0</span>]
+    <span class="k">if</span> t == <span class="s">'{'</span>:                            <span class="c"># 块</span>
+        self.next(); stmts = []
+        <span class="k">while</span> self.peek()[<span class="n">0</span>] != <span class="s">'}'</span>:
+            stmts.append(self.statement())
+        self.expect(<span class="s">'}'</span>); <span class="k">return</span> Block(stmts)
+    <span class="k">if</span> t == <span class="s">'if'</span>:                          <span class="c"># 分支（解析现在写，生成留到 M5）</span>
+        self.next(); self.expect(<span class="s">'('</span>)
+        cond = self.expr(); self.expect(<span class="s">')'</span>)
+        then = self.statement(); els = <span class="k">None</span>
+        <span class="k">if</span> self.peek()[<span class="n">0</span>] == <span class="s">'else'</span>:
+            self.next(); els = self.statement()
+        <span class="k">return</span> If(cond, then, els)
+    <span class="k">if</span> t == <span class="s">'while'</span>:                       <span class="c"># 循环（M5）</span>
+        self.next(); self.expect(<span class="s">'('</span>)
+        cond = self.expr(); self.expect(<span class="s">')'</span>)
+        <span class="k">return</span> Wh(cond, self.statement())
+    <span class="k">if</span> t == <span class="s">'print'</span>:                       <span class="c"># 输出</span>
+        self.next()
+        e = self.expr(); self.expect(<span class="s">';'</span>); <span class="k">return</span> Print(e)
+    <span class="k">if</span> t == <span class="s">'ID'</span> <span class="k">and</span> self.tokens[self.pos + <span class="n">1</span>][<span class="n">0</span>] == <span class="s">'='</span>:  <span class="c"># 赋值</span>
+        name = self.next()[<span class="n">1</span>]; self.next()
+        e = self.expr(); self.expect(<span class="s">';'</span>); <span class="k">return</span> Asg(name, e)
+    <span class="k">raise</span> SyntaxError(<span class="s">"意外的语句开头: %s"</span> % t)</code></pre>
+  </div>
+  <p>验收：加一个 <code>--ast</code> 开关，打印缩进树。建议 <code>if/while</code> 的解析现在就写好（代码生成留到步骤 5），这样 M2 就能打印完整程序：</p>
+  <div class="codeblock">
+    <figcaption>$ python3 minic.py --ast tests/t2_assign.txt</figcaption>
+    <pre><code>Block
+  Asg(x)
+    Num(3)
+  Asg(y)
+    Bin(*)
+      Var(x)
+      Num(4)
+  Print
+    Var(y)</code></pre>
+  </div>
+
+  <h3>20.4 步骤 3：代码生成——表达式与 print（M3）</h3>
+  <p>对应第 9 章：后序遍历 AST，用"栈式求值"策略生成 AT&amp;T 汇编。程序骨架 = 一个 <code>calc</code> 函数 + 栈帧序言/尾声 + <code>printf</code> 输出（第 16 章的 <code>Gen.gen</code> 可以直接复用）：</p>
+  <div class="codeblock">
+    <figcaption>minic.py —— 汇编骨架与 print 语句</figcaption>
+    <pre><code><span class="c"># main() 输出骨架：序言 → 语句代码 → 尾声 → 格式串</span>
+<span class="k">print</span>(<span class="s">'.text'</span>); <span class="k">print</span>(<span class="s">'.globl calc'</span>); <span class="k">print</span>(<span class="s">'calc:'</span>)
+<span class="k">print</span>(<span class="s">'  pushq %rbp'</span>)            <span class="c"># 保存上层帧指针</span>
+<span class="k">print</span>(<span class="s">'  movq  %rsp, %rbp'</span>)        <span class="c"># 建立本层栈帧</span>
+<span class="k">print</span>(<span class="s">'  subq  $512, %rsp'</span>)        <span class="c"># 预留 64 个变量的栈槽（M4 用）</span>
+<span class="k">for</span> line in gen(ast): <span class="k">print</span>(line)
+<span class="k">print</span>(<span class="s">'  movq  %rbp, %rsp'</span>); <span class="k">print</span>(<span class="s">'  popq  %rbp'</span>); <span class="k">print</span>(<span class="s">'  ret'</span>)
+<span class="k">print</span>(<span class="s">'.section .rodata'</span>); <span class="k">print</span>(<span class="s">'.Lfmt:'</span>); <span class="k">print</span>(<span class="s">'  .string "%d\\n"'</span>)
+
+<span class="c"># Print 语句：表达式结果已压栈 → 交给 printf 打印</span>
+<span class="k">def</span> <span class="f">gen_stmt</span>(self, node):
+    <span class="k">if</span> <span class="k">isinstance</span>(node, Print):
+        self.gen_expr(node.e)
+        self.emit(<span class="s">'popq'</span>, <span class="s">'%rsi'</span>)           <span class="c"># 第 2 个参数：要打印的整数</span>
+        self.emit(<span class="s">'leaq'</span>, <span class="s">'.Lfmt'</span>, <span class="s">'%rdi'</span>)  <span class="c"># 第 1 个参数：格式串地址</span>
+        self.emit(<span class="s">'call'</span>, <span class="s">'printf'</span>)</code></pre>
+  </div>
+  <p>验收（M3 的唯一标准）：</p>
+  <div class="codeblock">
+    <figcaption>$ python3 minic.py tests/t1_arith.txt &gt; t1.s &amp;&amp; gcc -no-pie t1.s -o t1 &amp;&amp; ./t1</figcaption>
+    <pre><code>7</code></pre>
+  </div>
+  <div class="callout tip"><span class="ico">📐</span><p><strong>System V AMD64 ABI（第 9 章）</strong>：函数的前 6 个整数参数依次放在 <code>%rdi %rsi %rdx %rcx %r8 %r9</code>。所以格式串进 <code>%rdi</code>、数字进 <code>%rsi</code>——你调 <code>printf</code> 和 GCC 调 <code>printf</code> 用的是同一套规则，这就是 ABI 的意义。</p></div>
+
+  <h3>20.5 步骤 4：变量与赋值——符号表与栈帧（M4）</h3>
+  <p>对应第 6 章符号表 + 第 9 章栈帧。变量 = 栈帧上的一个槽位：<code>Gen</code> 维护一张 <code>slots</code> 字典（name → 相对 <code>%rbp</code> 的负偏移），第一次赋值时分配槽位，读写都走内存寻址：</p>
+  <div class="codeblock">
+    <figcaption>minic.py —— 符号表（栈槽分配）与变量读写</figcaption>
+    <pre><code><span class="k">class</span> <span class="f">Gen</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self):
+        self.lines = []; self.slots = {}; self.off = <span class="n">0</span>; self.lbl = <span class="n">0</span>
+    <span class="k">def</span> <span class="f">alloc</span>(self, name):      <span class="c"># 第 6 章符号表的最小形态</span>
+        self.off += <span class="n">8</span>
+        self.slots[name] = self.off
+
+<span class="k">def</span> <span class="f">gen_expr</span>(self, node):       <span class="c"># 读变量：栈 → eax → 压栈</span>
+    <span class="k">if</span> <span class="k">isinstance</span>(node, Var):
+        off = self.slots[node.n]
+        self.emit(<span class="s">'movl'</span>, <span class="s">'-%d(%%rbp)'</span> % off, <span class="s">'%eax'</span>)
+        self.emit(<span class="s">'pushq'</span>, <span class="s">'%rax'</span>); <span class="k">return</span>
+
+<span class="k">def</span> <span class="f">gen_stmt</span>(self, node):        <span class="c"># 写变量：算完弹栈 → 写回栈槽</span>
+    <span class="k">if</span> <span class="k">isinstance</span>(node, Asg):
+        <span class="k">if</span> node.n <span class="k">not</span> <span class="k">in</span> self.slots: self.alloc(node.n)
+        self.gen_expr(node.e)
+        self.emit(<span class="s">'popq'</span>, <span class="s">'%rax'</span>)
+        self.emit(<span class="s">'movl'</span>, <span class="s">'%eax'</span>, <span class="s">'-%d(%%rbp)'</span> % self.slots[node.n])</code></pre>
+  </div>
+  <p>验收（M4 的唯一标准）：</p>
+  <div class="codeblock">
+    <figcaption>$ cat tests/t2_assign.txt &amp;&amp; ./run_tests.sh</figcaption>
+    <pre><code><span class="c"># expect: 12</span>
+x = 3;
+y = x * 4;
+print y;
+
+PASS tests/t2_assign.txt -&gt; 12</code></pre>
+  </div>
+  <div class="callout note"><span class="ico">🎁</span><p><strong>加分项（第 6 章语义分析）</strong>：对"使用未赋值变量"报错 <code>line 2: variable 'y' used before assignment</code>。要做这个，词法分析时顺手给每个 token 记下行号——一个很小的改动，但你的编译器立刻从"玩具"向"工具"迈进一步。</p></div>
+
+  <h3>20.6 步骤 5：if / while 控制流（M5）</h3>
+  <p>对应第 9 章跳转指令。约定"0 为假、非 0 为真"：把条件表达式结果弹到 <code>%eax</code>，<code>testl %eax, %eax</code> 检测是否为零，<code>jne</code> 跳到 then 分支。标签用自增计数器生成，保证唯一：</p>
+  <div class="codeblock">
+    <figcaption>minic.py —— 分支与循环的代码生成</figcaption>
+    <pre><code><span class="k">def</span> <span class="f">gen_stmt</span>(self, node):
+    <span class="k">if</span> <span class="k">isinstance</span>(node, If):
+        L_then, L_end = self.label(), self.label()
+        self.gen_expr(node.c)              <span class="c"># 条件结果压栈</span>
+        self.emit(<span class="s">'popq'</span>, <span class="s">'%rax'</span>); self.emit(<span class="s">'testl'</span>, <span class="s">'%eax'</span>, <span class="s">'%eax'</span>)
+        self.emit(<span class="s">'jne'</span>, L_then)         <span class="c"># 真 → then</span>
+        <span class="k">if</span> node.e: self.gen_stmt(node.e)  <span class="c"># 假 → else（如有）</span>
+        self.emit(<span class="s">'jmp'</span>, L_end)
+        self.emit(<span class="s">'%s:'</span> % L_then); self.gen_stmt(node.t)
+        self.emit(<span class="s">'%s:'</span> % L_end)
+
+    <span class="k">if</span> <span class="k">isinstance</span>(node, Wh):
+        L_cond, L_body, L_end = self.label(), self.label(), self.label()
+        self.emit(<span class="s">'%s:'</span> % L_cond)       <span class="c"># 每轮先测条件</span>
+        self.gen_expr(node.c)
+        self.emit(<span class="s">'popq'</span>, <span class="s">'%rax'</span>); self.emit(<span class="s">'testl'</span>, <span class="s">'%eax'</span>, <span class="s">'%eax'</span>)
+        self.emit(<span class="s">'jne'</span>, L_body); self.emit(<span class="s">'jmp'</span>, L_end)
+        self.emit(<span class="s">'%s:'</span> % L_body); self.gen_stmt(node.b)
+        self.emit(<span class="s">'jmp'</span>, L_cond)        <span class="c"># 回到条件判断</span>
+        self.emit(<span class="s">'%s:'</span> % L_end)</code></pre>
+  </div>
+  <p>while 循环的运行时结构一目了然——<code>L_cond</code> 与 <code>L_body</code> 之间构成回边，条件为假时跳出：</p>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart LR
+  A["L_cond<br/>测试条件"] -->|"非 0（真）"| B["L_body<br/>执行循环体"]
+  B -->|"jmp 回边"| A
+  A -->|"0（假）"| C["L_end<br/>继续后续语句"]
+  style A fill:#0b9e6b22,stroke:#0b9e6b
+  style B fill:#2f6bff18,stroke:#2f6bff
+  style C fill:#ffffff,stroke:#dbe6df
+    </pre>
+    <figcaption>图 20-2　while 循环的控制流：一个前测循环 = 条件标签 + 回边 + 出口，与第 8 章的控制流图（CFG）是同一结构</figcaption>
+  </div>
+  <p>验收（M5 的标准）：<code>if/else</code> 走对分支、<code>while</code> 配合递减计数完成求和。运行一键脚本：</p>
+  <div class="codeblock">
+    <figcaption>$ ./run_tests.sh —— 三个控制流用例一起过</figcaption>
+    <pre><code>PASS tests/t3_if.txt -&gt; 1
+PASS tests/t4_while.txt -&gt; 120
+PASS tests/t5_sum100.txt -&gt; 5050</code></pre>
+  </div>
+  <p><code>t3_if.txt</code> 用 <code>n - 10</code> 的结果做真值判断（0 为假）：</p>
+  <div class="codeblock">
+    <figcaption>tests/t3_if.txt —— 用减法结果当条件，不需要比较运算符</figcaption>
+    <pre><code><span class="c"># expect: 1</span>
+n = 10;
+<span class="k">if</span> (n - 10) { print 0; } <span class="k">else</span> { print 1; }</code></pre>
+  </div>
+
+  <h3>20.7 步骤 6（进阶）：比较运算与函数调用（M6，加分）</h3>
+  <p>两个进阶特性，任选其一即可加分，全部完成 +10（封顶）。做完它们，你的 MiniC 就能跑 <code>while (i &lt;= 100)</code> 和递归函数了。</p>
+  <h4>比较运算（+5 分）</h4>
+  <p>关键指令 <code>cmpl</code> + 条件跳转：比较结果需要"物化"成 0/1 再压栈，供 <code>testl</code> 使用：</p>
+  <div class="codeblock">
+    <figcaption>minic.py —— 比较运算：结果物化为 0 或 1</figcaption>
+    <pre><code><span class="k">if</span> node.o <span class="k">in</span> (<span class="s">'=='</span>, <span class="s">'!='</span>, <span class="s">'&lt;'</span>, <span class="s">'&gt;'</span>, <span class="s">'&lt;='</span>, <span class="s">'&gt;='</span>):
+    self.gen_expr(node.l); self.gen_expr(node.r)
+    self.emit(<span class="s">'popq'</span>, <span class="s">'%rcx'</span>); self.emit(<span class="s">'popq'</span>, <span class="s">'%rax'</span>)
+    self.emit(<span class="s">'cmpl'</span>, <span class="s">'%ecx'</span>, <span class="s">'%eax'</span>)   <span class="c"># 计算 %eax - %ecx</span>
+    L1, L2 = self.label(), self.label()
+    jcc = {<span class="s">'=='</span>: <span class="s">'je'</span>, <span class="s">'!='</span>: <span class="s">'jne'</span>, <span class="s">'&lt;'</span>: <span class="s">'jl'</span>,
+           <span class="s">'&gt;'</span>: <span class="s">'jg'</span>, <span class="s">'&lt;='</span>: <span class="s">'jle'</span>, <span class="s">'&gt;='</span>: <span class="s">'jge'</span>}[node.o]
+    self.emit(jcc, L1)                    <span class="c"># 成立 → 结果为 1</span>
+    self.emit(<span class="s">'movl'</span>, <span class="s">'$0'</span>, <span class="s">'%eax'</span>); self.emit(<span class="s">'jmp'</span>, L2)
+    self.emit(<span class="s">'%s:'</span> % L1); self.emit(<span class="s">'movl'</span>, <span class="s">'$1'</span>, <span class="s">'%eax'</span>)
+    self.emit(<span class="s">'%s:'</span> % L2); self.emit(<span class="s">'pushq'</span>, <span class="s">'%rax'</span>); <span class="k">return</span></code></pre>
+  </div>
+  <div class="callout warn"><span class="ico">⚠️</span><p><strong>AT&amp;T 陷阱（第 9 章）</strong>：<code>cmpl %ecx, %eax</code> 计算的是 <code>%eax - %ecx</code>，操作数顺序与直觉相反；<code>&lt;</code> 对应 <code>jl</code>（signed less），不要误用 <code>jb</code>（unsigned below）。这是无数人第一次写汇编时踩的坑，验收报告里值得记一笔。</p></div>
+
+  <h4>函数调用（+10 分，最难）</h4>
+  <p>语法扩展：<code>fn 名字 ( 参数… ) { 语句… return 表达式; }</code>，调用形如 <code>x = fib(10);</code>。简化约定：调用者把实参依次 <code>pushq</code>，被调者从 <code>8(%rbp)</code>、<code>16(%rbp)</code>… 读参数，返回值放 <code>%rax</code>。验收用例——递归斐波那契：</p>
+  <div class="codeblock">
+    <figcaption>tests/t6_func.txt —— 函数 + 递归 + 比较的终极用例</figcaption>
+    <pre><code><span class="c"># expect: 55</span>
+<span class="k">fn</span> fib(n) {
+    <span class="k">if</span> (n &lt; 2) { <span class="k">return</span> n; }
+    <span class="k">return</span> fib(n - 1) + fib(n - 2);
+}
+print fib(10);</code></pre>
+  </div>
+  <div class="callout tip"><span class="ico">🧗</span><p><strong>函数 + 递归是这个项目"从玩具变工具"的分水岭</strong>：它要求你真正理解第 9 章的栈帧——每个调用一层帧、<code>%rbp</code> 链式指向上层、局部变量全部帧内寻址、<code>call/ret</code> 成对管理返回地址。做完它，你对"函数调用到底发生了什么"的理解将超过大多数只写过 C 的工程师。</p></div>
+
+  <h3>20.8 最终验收：测试套件与验收报告</h3>
+  <h4>测试套件（20 分）</h4>
+  <p>5 个基础用例 + 1 个进阶用例，全部 PASS 即测试满分：</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>用例</th><th>程序要点</th><th>期望输出</th><th>覆盖里程碑</th></tr></thead>
+      <tbody>
+        <tr><td>t1_arith</td><td><code>print 1 + 2 * 3;</code>（优先级）</td><td>7</td><td>M1–M3</td></tr>
+        <tr><td>t2_assign</td><td>变量声明、赋值、参与运算</td><td>12</td><td>M4</td></tr>
+        <tr><td>t3_if</td><td><code>if / else</code> 按真值走分支</td><td>1</td><td>M5</td></tr>
+        <tr><td>t4_while</td><td><code>while</code> 递减计数求 5!</td><td>120</td><td>M5</td></tr>
+        <tr><td>t5_sum100</td><td>1+2+…+100 求和（20.1 示例）</td><td>5050</td><td>M5</td></tr>
+        <tr><td>t6_func（进阶）</td><td>递归 fib + 比较运算</td><td>55</td><td>M6</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>与 GCC 对比验证（验收报告的核心素材）</h4>
+  <p>第 12 章的工具链在这里做裁判——把同样的逻辑写成 C，与你的编译器逐行对比：</p>
+  <div class="codeblock">
+    <figcaption>你的产物 vs. GCC 的产物</figcaption>
+    <pre><code>cat &gt; t5.c &lt;&lt;'EOF'
+#include &lt;stdio.h&gt;
+int calc(void){ int i = 100, sum = 0;
+    while (i) { sum += i; i = i - 1; } return sum; }
+int main(void){ printf("%d\n", calc()); return 0; }
+EOF
+gcc -O0 -S t5.c -o t5_O0.s        <span class="c"># 与你的 minic 输出对比：谁更啰嗦？</span>
+gcc -O2 -S t5.c -o t5_O2.s        <span class="c"># -O2 直接算出 5050——第 8 章优化器的力量</span>
+file /tmp/minic_out               <span class="c"># ELF 64-bit executable：你链接出了真二进制</span>
+readelf -h /tmp/minic_out | head -12   <span class="c"># 读 ELF 头：入口、架构、节区表</span>
+objdump -d /tmp/minic_out | head -30   <span class="c"># 反汇编你自己生成的机器码</span></code></pre>
+  </div>
+
+  <h4>验收报告模板（20 分，一页以上）</h4>
+  <div class="card">
+    <ol>
+      <li><strong>项目概述</strong>：MiniC 语言规范（文字或 EBNF）+ 四阶段架构图（词法 → 语法 → AST → 代码生成）。</li>
+      <li><strong>实现要点</strong>：每个里程碑 3–5 行思路 + 关键代码片段（引用文件与行号）。</li>
+      <li><strong>困难与突破</strong>：至少 1 个卡住你的问题、你如何排查、最终解法（例如：栈不平衡导致的段错误、标签重名、<code>cmpl</code> 操作数顺序）。</li>
+      <li><strong>GCC 对比分析</strong>：你的代码生成与 <code>gcc -O0</code> 的至少 3 处差异（例如：你全部用栈、GCC 用寄存器；你每次运算都压栈弹栈、GCC 有常量折叠；你固定 512 字节栈帧、GCC 按需分配……）。</li>
+      <li><strong>自评打分</strong>：按 20.1 的评分表逐项打分并说明理由。</li>
+      <li><strong>附录</strong>：<code>./run_tests.sh</code> 输出截图、<code>objdump</code> 输出截图。</li>
+    </ol>
+  </div>
+  <div class="callout tip"><span class="ico">🎓</span><p><strong>完成标准</strong>：测试套件全部 PASS + 报告一页以上 = 验收合格。这时你已经有资格说：我写过编译器，我知道 <code>gcc hello.c</code> 背后发生了什么——不是背下来的，是亲手做出来的。</p></div>
+
+  <h3>20.9 验收自检清单</h3>
+  <p>逐项勾选，进度保存在浏览器本地（<code>localStorage</code>），关掉页面也不会丢：</p>
+  <div class="card" id="acceptChecklist">
+    <div class="accept-bar"><div id="acceptBar"></div></div>
+    <p class="accept-txt" id="acceptTxt"></p>
+    <label class="accept-item"><input type="checkbox"> M0 环境就绪：gcc / as / python3 可用，项目骨架建好</label>
+    <label class="accept-item"><input type="checkbox"> M1 词法分析器：<code>--tokens</code> 输出正确，含 <code>#</code> 注释与双字符运算符</label>
+    <label class="accept-item"><input type="checkbox"> M2 语法分析器：<code>--ast</code> 树形结构正确</label>
+    <label class="accept-item"><input type="checkbox"> M3 代码生成：t1 输出 7</label>
+    <label class="accept-item"><input type="checkbox"> M4 变量与赋值：t2 输出 12</label>
+    <label class="accept-item"><input type="checkbox"> M5 控制流：t3 / t4 / t5 全部通过（含 5050）</label>
+    <label class="accept-item"><input type="checkbox"> M6 进阶（可选）：比较运算 / 函数调用，t6 输出 55</label>
+    <label class="accept-item"><input type="checkbox"> 测试套件：5 个基础用例全部 PASS</label>
+    <label class="accept-item"><input type="checkbox"> GCC 对比分析完成：gcc -S / objdump / readelf 至少各跑一次</label>
+    <label class="accept-item"><input type="checkbox"> 验收报告完成并自评打分 🎉</label>
+  </div>
+  <script>
+  /* 验收自检清单：勾选状态保存在 localStorage */
+  (function () {
+    'use strict';
+    var KEY = 'gcc-ch20-checklist';
+    var box = document.getElementById('acceptChecklist');
+    if (!box) return;
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { /* ignore */ }
+    var inputs = Array.prototype.slice.call(box.querySelectorAll('input[type="checkbox"]'));
+    function upd() {
+      var done = inputs.filter(function (i) { return i.checked; }).length;
+      var bar = document.getElementById('acceptBar');
+      var txt = document.getElementById('acceptTxt');
+      if (bar) bar.style.width = Math.round(done / inputs.length * 100) + '%';
+      if (txt) txt.textContent = done + ' / ' + inputs.length + ' 项完成 · ' + Math.round(done / inputs.length * 100) + '%';
+      var store = {};
+      inputs.forEach(function (i, idx) { if (i.checked) store['i' + idx] = 1; });
+      try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* ignore */ }
+    }
+    inputs.forEach(function (i, idx) {
+      if (saved['i' + idx]) i.checked = true;
+      i.addEventListener('change', upd);
+    });
+    upd();
+  })();
+  </script>
+</section>
+
 <!-- ===== Footer ===== -->
 <footer class="site-footer">
   <div class="sources">
@@ -3624,9 +4066,9 @@ file build/app
     </ol>
   </div>
   <div class="footer-note">
-    本网站为 GCC 编译原理教学课件（HTML 单文件交互版）· <strong>v4.1</strong> · 19 章完整课程 · 2026-08<br>
-    <span style="color:var(--muted)">📚 另有<b><a href="./chapters/index.html" style="color:var(--accent)">分章版</a></b>：19 章独立网页，每章可单独浏览/打印，含章内目录、快问快答与学习进度追踪</span><br>
-    更新记录：v1.0 基础 14 章 → v2.0 进阶专题 → v3.0 体验优化 → v4.0 深度扩容 30 轮 → v4.1 分章版站点<br>
+    本网站为 GCC 编译原理教学课件（HTML 单文件交互版）· <strong>v4.2</strong> · 20 章完整课程 · 2026-08<br>
+    <span style="color:var(--muted)">📚 另有<b><a href="./chapters/index.html" style="color:var(--accent)">分章版</a></b>：20 章独立网页，每章可单独浏览/打印，含章内目录、快问快答与学习进度追踪</span><br>
+    更新记录：v1.0 基础 14 章 → v2.0 进阶专题 → v3.0 体验优化 → v4.0 深度扩容 30 轮 → v4.1 分章版站点 → v4.2 结课验收项目章<br>
     文中命令输出均为示意/实测简化版，实际输出随 GCC 版本与平台略有差异<br>
     建议使用 Chrome / Edge 最新版浏览，以获得最佳图表与交互体验
   </div>
